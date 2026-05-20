@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>OTP Demo</title>
+  <style>
+    body { font-family: Arial; max-width: 400px; margin: 60px auto; padding: 0 20px; }
+    input { width: 100%; padding: 10px; margin: 8px 0; box-sizing: border-box; font-size: 16px; }
+    button { width: 100%; padding: 12px; background: #2E75B6; color: white; border: none; font-size: 16px; cursor: pointer; border-radius: 4px; }
+    #msg { margin-top: 12px; padding: 10px; border-radius: 4px; display: none; }
+    .success { background: #e8f5e9; color: #2e7d32; }
+    .error   { background: #ffebee; color: #c62828; }
+  </style>
+</head>
+<body>
+  <h2>Xác nhận Email bằng OTP</h2>
+
+  <div id="step1">
+    <input id="email" type="email" placeholder="Nhập email của bạn" />
+    <button onclick="sendOTP()">Gửi mã OTP</button>
+  </div>
+
+  <div id="step2" style="display:none; margin-top:20px;">
+    <input id="otp" type="text" placeholder="Nhập mã OTP 6 chữ số" maxlength="6" />
+    <button onclick="verifyOTP()">Xác nhận</button>
+  </div>
+
+  <div id="msg"></div>
+
+  <script>
+    const email = () => document.getElementById('email').value
+
+    async function sendOTP() {
+      const res = await fetch('/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email() }),
+      })
+      const data = await res.json()
+      showMsg(data.msg, true)
+      document.getElementById('step2').style.display = 'block'
+    }
+
+    async function verifyOTP() {
+      const otp = document.getElementById('otp').value
+      const res = await fetch('/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email(), otp }),
+      })
+      const data = await res.json()
+      showMsg(data.msg, data.ok)
+    }
+
+    function showMsg(text, success) {
+      const el = document.getElementById('msg')
+      el.textContent = text
+      el.className = success ? 'success' : 'error'
+      el.style.display = 'block'
+    }
+  </script>
+</body>
+</html>
